@@ -1,0 +1,66 @@
+@model PortalSanMarco.ViewModels.RedefinirSenhaViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Criar nova senha";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criar nova senha - Portal San Marco</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body class="min-vh-100 d-flex align-items-center justify-content-center p-4 bg-light">
+    <main class="card border-0 shadow-sm w-100" style="max-width:560px">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-success fw-bold mb-3">Portal San Marco</div>
+            <h1 class="h3 mb-2">Crie sua nova senha</h1>
+            <p class="text-muted mb-4">
+                Este link é individual, expira em 30 minutos e funciona uma única vez.
+            </p>
+
+            <form asp-controller="Conta"
+                  asp-action="RedefinirSenha"
+                  method="post">
+
+                <input asp-for="UsuarioId" type="hidden" />
+                <input asp-for="Token" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="NovaSenha" class="form-label"></label>
+                    <input asp-for="NovaSenha"
+                           class="form-control"
+                           autocomplete="new-password"
+                           autofocus />
+                    <span asp-validation-for="NovaSenha" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmacaoSenha" class="form-label"></label>
+                    <input asp-for="ConfirmacaoSenha"
+                           class="form-control"
+                           autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmacaoSenha" class="text-danger small"></span>
+                </div>
+
+                <partial name="_PasswordChecklist" />
+
+                <button type="submit" class="btn btn-success btn-lg w-100">
+                    Salvar nova senha
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/password-checklist.js" asp-append-version="true"></script>
+</body>
+</html>

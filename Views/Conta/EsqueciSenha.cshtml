@@ -1,0 +1,72 @@
+@model PortalSanMarco.ViewModels.EsqueciSenhaViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Esqueci minha senha";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Esqueci minha senha - Portal San Marco</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f4f7f5, #e8f3ed);
+        }
+
+        .recovery-card {
+            max-width: 520px;
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 22px 55px rgba(10, 55, 35, 0.12);
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center p-4">
+    <main class="card recovery-card w-100">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-success fw-bold mb-3">Portal San Marco</div>
+            <h1 class="h3 mb-2">Recuperar senha</h1>
+            <p class="text-muted mb-4">
+                Informe seu e-mail corporativo para receber um link seguro.
+            </p>
+
+            <form asp-controller="Conta"
+                  asp-action="EsqueciSenha"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-4">
+                    <label asp-for="Email" class="form-label fw-semibold"></label>
+                    <input asp-for="Email"
+                           class="form-control form-control-lg"
+                           autocomplete="email"
+                           autofocus
+                           placeholder="seuemail@empresa.com.br" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg w-100">
+                    Enviar link de recuperação
+                </button>
+            </form>
+
+            <a asp-controller="Conta"
+               asp-action="Entrar"
+               class="btn btn-link text-success w-100 mt-3">
+                Voltar para o login
+            </a>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

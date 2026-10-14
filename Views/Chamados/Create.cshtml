@@ -1,0 +1,147 @@
+@model PortalSanMarco.ViewModels.NovoChamadoViewModel
+
+@{
+    ViewData["Title"] = "Novo chamado";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Novo chamado</h1>
+    <p class="text-muted mb-0">
+        Conte para a TI o que está acontecendo
+    </p>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <form asp-controller="Chamados"
+              asp-action="Create"
+              method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Titulo"
+                           class="form-label"></label>
+
+                    <input asp-for="Titulo"
+                           class="form-control"
+                           placeholder="Ex.: Impressora não está funcionando" />
+
+                    <span asp-validation-for="Titulo"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Descricao"
+                           class="form-label"></label>
+
+                    <textarea asp-for="Descricao"
+                              class="form-control"
+                              rows="6"
+                              placeholder="Descreva o problema e quando ele começou"></textarea>
+
+                    <span asp-validation-for="Descricao"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CategoriaId"
+                           class="form-label"></label>
+
+                    <select asp-for="CategoriaId"
+                            asp-items="ViewBag.Categorias"
+                            class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+
+                    <span asp-validation-for="CategoriaId"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Prioridade"
+                           class="form-label"></label>
+
+                    <select asp-for="Prioridade"
+                            class="form-select">
+                        <option value="1">
+                            1 — Leve
+                        </option>
+                        <option value="2">
+                            2 — Média
+                        </option>
+                        <option value="3">
+                            3 — Urgente
+                        </option>
+                    </select>
+
+                    <span asp-validation-for="Prioridade"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="UnidadeId"
+                           class="form-label"></label>
+
+                    <select asp-for="UnidadeId"
+                            asp-items="ViewBag.Unidades"
+                            class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+
+                    <span asp-validation-for="UnidadeId"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="SetorId"
+                           class="form-label"></label>
+
+                    <select asp-for="SetorId"
+                            asp-items="ViewBag.Setores"
+                            class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+
+                    <span asp-validation-for="SetorId"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="ComputadorPatrimonio"
+                           class="form-label"></label>
+
+                    <input asp-for="ComputadorPatrimonio"
+                           class="form-control"
+                           placeholder="Nome do computador, patrimônio ou equipamento" />
+                </div>
+            </div>
+
+            <div class="alert alert-light border mt-4 mb-0">
+                <strong>Prioridade:</strong>
+                leve para solicitações comuns, média quando
+                prejudica o trabalho e urgente somente quando
+                a operação estiver parada.
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit"
+                        class="btn btn-success">
+                    Abrir chamado
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

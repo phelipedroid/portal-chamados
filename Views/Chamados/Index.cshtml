@@ -1,0 +1,546 @@
+@model IEnumerable<PortalSanMarco.Models.Chamado>
+@inject PortalSanMarco.Services.ISlaService SlaService
+
+@{
+    ViewData["Title"] = "Chamados";
+    var agora = DateTime.Now;
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Chamados</h1>
+        <p class="text-muted mb-0">
+            Acompanhe as solicitações de suporte
+        </p>
+
+        <div class="small text-muted mt-1"
+             data-auto-refresh="60000">
+            Atualização automática a cada 1 minuto.
+            <span data-auto-refresh-status></span>
+        </div>
+    </div>
+
+    <a asp-controller="Chamados"
+       asp-action="Create"
+       class="btn btn-success">
+        Novo chamado
+    </a>
+</div>
+
+@if (TempData["Sucesso"] is not null)
+{
+    <div class="alert alert-success">
+        @TempData["Sucesso"]
+    </div>
+}
+
+@if (TempData["Erro"] is not null)
+{
+    <div class="alert alert-danger">
+        @TempData["Erro"]
+    </div>
+}
+
+<div id="resumo-chamados"
+     data-auto-refresh-region
+     class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Abertos</div>
+                <div class="fs-3 fw-bold text-primary">
+                    @ViewBag.TotalAbertos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Em andamento</div>
+                <div class="fs-3 fw-bold text-warning">
+                    @ViewBag.TotalEmAndamento
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Aguardando</div>
+                <div class="fs-3 fw-bold text-secondary">
+                    @ViewBag.TotalAguardando
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Finalizados</div>
+                <div class="fs-3 fw-bold text-success">
+                    @ViewBag.TotalFinalizados
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get"
+              asp-controller="Chamados"
+              asp-action="Index">
+
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-4">
+                    <label for="busca" class="form-label">
+                        Pesquisar
+                    </label>
+
+                    <input type="text"
+                           id="busca"
+                           name="busca"
+                           value="@ViewBag.Busca"
+                           class="form-control"
+                           placeholder="Número, título ou descrição" />
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <label for="status" class="form-label">
+                        Status
+                    </label>
+
+                    <select id="status"
+                            name="status"
+                            class="form-select">
+                        <option value="">Todos</option>
+
+                        @foreach (var item in Enum.GetValues<PortalSanMarco.Models.StatusChamado>())
+                        {
+                            var texto = item switch
+                            {
+                                PortalSanMarco.Models.StatusChamado.EmAndamento
+                                    => "Em andamento",
+                                PortalSanMarco.Models.StatusChamado.AguardandoFuncionario
+                                    => "Aguardando funcionário",
+                                PortalSanMarco.Models.StatusChamado.AguardandoFornecedor
+                                    => "Aguardando fornecedor",
+                                _ => item.ToString()
+                            };
+
+                            if (ViewBag.StatusSelecionado is not null &&
+                                (int)ViewBag.StatusSelecionado == (int)item)
+                            {
+                                <option value="@((int)item)" selected>
+                                    @texto
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@((int)item)">
+                                    @texto
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <label for="prioridade" class="form-label">
+                        Prioridade
+                    </label>
+
+                    <select id="prioridade"
+                            name="prioridade"
+                            class="form-select">
+                        <option value="">Todas</option>
+
+                        @foreach (var item in Enum.GetValues<PortalSanMarco.Models.PrioridadeChamado>())
+                        {
+                            var texto = item switch
+                            {
+                                PortalSanMarco.Models.PrioridadeChamado.Media
+                                    => "Média",
+                                PortalSanMarco.Models.PrioridadeChamado.Urgente
+                                    => "Urgente",
+                                _ => "Leve"
+                            };
+
+                            if (ViewBag.PrioridadeSelecionada is not null &&
+                                (int)ViewBag.PrioridadeSelecionada == (int)item)
+                            {
+                                <option value="@((int)item)" selected>
+                                    @texto
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@((int)item)">
+                                    @texto
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                @if (ViewBag.PodeFiltrarResponsavel == true)
+                {
+                    <div class="col-lg-2 col-md-4">
+                        <label for="responsavel" class="form-label">
+                            Responsável
+                        </label>
+
+                        <select id="responsavel"
+                                name="responsavel"
+                                class="form-select"
+                                asp-items="ViewBag.ResponsaveisFiltro">
+                            <option value="">Todos</option>
+                            <option value="sem-responsavel"
+                                    selected="@(ViewBag.ResponsavelSelecionado == "sem-responsavel")">
+                                Sem responsável
+                            </option>
+                        </select>
+                    </div>
+                }
+
+                <div class="col-lg-2 col-md-4">
+                    <label for="ordem" class="form-label">
+                        Ordenar
+                    </label>
+
+                    <select id="ordem"
+                            name="ordem"
+                            class="form-select">
+                        <option value="recentes"
+                                selected="@(ViewBag.OrdemSelecionada == "recentes")">
+                            Mais recentes
+                        </option>
+
+                        <option value="antigos"
+                                selected="@(ViewBag.OrdemSelecionada == "antigos")">
+                            Mais antigos
+                        </option>
+
+                        <option value="prioridade"
+                                selected="@(ViewBag.OrdemSelecionada == "prioridade")">
+                            Prioridade
+                        </option>
+
+                        <option value="numero"
+                                selected="@(ViewBag.OrdemSelecionada == "numero")">
+                            Número
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <div class="d-flex gap-2">
+                        <button type="submit"
+                                class="btn btn-success flex-grow-1">
+                            Filtrar
+                        </button>
+
+                        <a asp-controller="Chamados"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Limpar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="lista-chamados"
+     data-auto-refresh-region
+     class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Número</th>
+                    <th>Chamado</th>
+                    <th>Categoria</th>
+                    <th>Unidade / Setor</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Responsável</th>
+                    <th>Aberto em</th>
+                    <th>Finalizado em</th>
+                    <th>Prazo / SLA</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="10"
+                            class="text-center text-muted py-5">
+                            Nenhum chamado encontrado.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var chamado in Model)
+                    {
+                        var prioridadeClasse = chamado.Prioridade switch
+                        {
+                            PortalSanMarco.Models.PrioridadeChamado.Urgente
+                                => "bg-danger",
+                            PortalSanMarco.Models.PrioridadeChamado.Media
+                                => "bg-warning text-dark",
+                            _ => "bg-success"
+                        };
+
+                        var prioridadeTexto = chamado.Prioridade switch
+                        {
+                            PortalSanMarco.Models.PrioridadeChamado.Media
+                                => "Média",
+                            PortalSanMarco.Models.PrioridadeChamado.Urgente
+                                => "Urgente",
+                            _ => "Leve"
+                        };
+
+                        var statusTexto = chamado.Status switch
+                        {
+                            PortalSanMarco.Models.StatusChamado.EmAndamento
+                                => "Em andamento",
+                            PortalSanMarco.Models.StatusChamado.AguardandoFuncionario
+                                => "Aguardando funcionário",
+                            PortalSanMarco.Models.StatusChamado.AguardandoFornecedor
+                                => "Aguardando fornecedor",
+                            _ => chamado.Status.ToString()
+                        };
+
+                        var statusClasse = chamado.Status switch
+                        {
+                            PortalSanMarco.Models.StatusChamado.Aberto
+                                => "bg-primary",
+                            PortalSanMarco.Models.StatusChamado.EmAndamento
+                                => "bg-warning text-dark",
+                            PortalSanMarco.Models.StatusChamado.AguardandoFuncionario
+                                => "bg-info text-dark",
+                            PortalSanMarco.Models.StatusChamado.AguardandoFornecedor
+                                => "bg-secondary",
+                            PortalSanMarco.Models.StatusChamado.Resolvido
+                                => "bg-success",
+                            PortalSanMarco.Models.StatusChamado.Fechado
+                                => "bg-dark",
+                            _ => "bg-secondary"
+                        };
+
+                        var estaFinalizado =
+                            chamado.Status == PortalSanMarco.Models.StatusChamado.Resolvido ||
+                            chamado.Status == PortalSanMarco.Models.StatusChamado.Fechado;
+
+                        var prazoTexto = "Sem prazo";
+                        var prazoClasse = "bg-secondary";
+
+                        if (chamado.PrazoEm.HasValue)
+                        {
+                            if (chamado.SlaPausadoEm.HasValue && !estaFinalizado)
+                            {
+                                prazoTexto = "SLA pausado";
+                                prazoClasse = "bg-info text-dark";
+                            }
+                            else if (estaFinalizado && chamado.ResolvidoEm.HasValue)
+                            {
+                                if (chamado.ResolvidoEm.Value <= chamado.PrazoEm.Value)
+                                {
+                                    prazoTexto = "Finalizado no prazo";
+                                    prazoClasse = "bg-success";
+                                }
+                                else
+                                {
+                                    prazoTexto = "Finalizado com atraso";
+                                    prazoClasse = "bg-danger";
+                                }
+                            }
+                            else if (agora > chamado.PrazoEm.Value)
+                            {
+                                prazoTexto = "Atrasado";
+                                prazoClasse = "bg-danger";
+                            }
+                            else if (SlaService.ContarMinutosUteis(
+                                         agora,
+                                         chamado.PrazoEm.Value) <= 120)
+                            {
+                                prazoTexto = "Vence em breve";
+                                prazoClasse = "bg-warning text-dark";
+                            }
+                            else
+                            {
+                                prazoTexto = "Dentro do prazo";
+                                prazoClasse = "bg-success";
+                            }
+                        }
+
+                        <tr>
+                            <td>
+                                <a asp-action="Details"
+                                   asp-route-id="@chamado.Id"
+                                   class="fw-bold text-decoration-none">
+                                    #@chamado.Id.ToString("D6")
+                                </a>
+                            </td>
+
+                            <td>
+                                <a asp-action="Details"
+                                   asp-route-id="@chamado.Id"
+                                   class="fw-bold text-decoration-none">
+                                    @chamado.Titulo
+                                </a>
+
+                                <div class="small text-muted">
+                                    @chamado.Solicitante.Email
+                                </div>
+                            </td>
+
+                            <td>@chamado.Categoria.Nome</td>
+
+                            <td>
+                                @chamado.Unidade.Nome
+                                <div class="small text-muted">
+                                    @chamado.Setor.Nome
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge @prioridadeClasse">
+                                    @prioridadeTexto
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="badge @statusClasse">
+                                    @statusTexto
+                                </span>
+                            </td>
+
+                            <td>
+                                @if (chamado.TecnicoResponsavel is not null)
+                                {
+                                    <div class="fw-semibold">
+                                        @chamado.TecnicoResponsavel.Email
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Não atribuído
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                @chamado.CriadoEm.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                @if (chamado.ResolvidoEm.HasValue)
+                                {
+                                    @chamado.ResolvidoEm.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (chamado.PrazoEm.HasValue)
+                                {
+                                    <div>
+                                        @chamado.PrazoEm.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted">—</div>
+                                }
+
+                                <span class="badge @prazoClasse">
+                                    @prazoTexto
+                                </span>
+
+                                @if (chamado.SlaMinutosPausados > 0)
+                                {
+                                    <div class="small text-muted mt-1">
+                                        Pausado por @chamado.SlaMinutosPausados min úteis
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.TotalItens > 0)
+    {
+        var primeiroItem =
+            ((int)ViewBag.PaginaAtual - 1) *
+            (int)ViewBag.ItensPorPagina + 1;
+
+        var ultimoItem = Math.Min(
+            (int)ViewBag.PaginaAtual *
+            (int)ViewBag.ItensPorPagina,
+            (int)ViewBag.TotalItens);
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 border-top">
+            <div class="small text-muted">
+                Exibindo @primeiroItem–@ultimoItem
+                de @ViewBag.TotalItens chamado(s)
+            </div>
+
+            @if (ViewBag.TotalPaginas > 1)
+            {
+                <nav aria-label="Paginação dos chamados">
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(ViewBag.PaginaAtual == 1 ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-controller="Chamados"
+                               asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaAtual - 1)"
+                               asp-route-busca="@ViewBag.Busca"
+                               asp-route-status="@ViewBag.StatusSelecionado"
+                               asp-route-prioridade="@ViewBag.PrioridadeSelecionada"
+                               asp-route-responsavel="@ViewBag.ResponsavelSelecionado"
+                               asp-route-ordem="@ViewBag.OrdemSelecionada">
+                                Anterior
+                            </a>
+                        </li>
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                @ViewBag.PaginaAtual de @ViewBag.TotalPaginas
+                            </span>
+                        </li>
+
+                        <li class="page-item @(ViewBag.PaginaAtual == ViewBag.TotalPaginas ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-controller="Chamados"
+                               asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaAtual + 1)"
+                               asp-route-busca="@ViewBag.Busca"
+                               asp-route-status="@ViewBag.StatusSelecionado"
+                               asp-route-prioridade="@ViewBag.PrioridadeSelecionada"
+                               asp-route-responsavel="@ViewBag.ResponsavelSelecionado"
+                               asp-route-ordem="@ViewBag.OrdemSelecionada">
+                                Próxima
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    }
+</div>

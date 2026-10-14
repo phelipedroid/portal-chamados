@@ -1,0 +1,153 @@
+@model PortalSanMarco.ViewModels.AuditoriaListaViewModel
+
+@{
+    ViewData["Title"] = "Auditoria administrativa";
+    var entidades = ViewBag.Entidades as IEnumerable<string> ?? [];
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Auditoria administrativa</h1>
+        <p class="text-muted mb-0">
+            Registro permanente das alterações feitas por administradores.
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-secondary fs-6">@Model.TotalItens registro(s)</span>
+        <a asp-action="ExportarPdf"
+           asp-route-busca="@Model.Busca"
+           asp-route-entidade="@Model.Entidade"
+           asp-route-dataInicial="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+           asp-route-dataFinal="@Model.DataFinal?.ToString("yyyy-MM-dd")"
+           class="btn btn-success">
+            Exportar PDF
+        </a>
+    </div>
+</div>
+
+@if (TempData["Erro"] is not null)
+{
+    <div class="alert alert-danger">@TempData["Erro"]</div>
+}
+
+@if (ViewBag.Erro is not null)
+{
+    <div class="alert alert-danger">@ViewBag.Erro</div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-lg-3">
+                <label for="busca" class="form-label">Pesquisar</label>
+                <input id="busca" name="busca" value="@Model.Busca"
+                       class="form-control"
+                       placeholder="Usuário, ação ou descrição" />
+            </div>
+            <div class="col-lg-2">
+                <label for="entidade" class="form-label">Área</label>
+                <select id="entidade" name="entidade" class="form-select">
+                    <option value="">Todas</option>
+                    @foreach (var item in entidades)
+                    {
+                        if (item == Model.Entidade)
+                        {
+                            <option value="@item" selected>@item</option>
+                        }
+                        else
+                        {
+                            <option value="@item">@item</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <label for="dataInicial" class="form-label">Data inicial</label>
+                <input id="dataInicial"
+                       name="dataInicial"
+                       type="date"
+                       value="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+                       class="form-control"
+                       required />
+            </div>
+            <div class="col-lg-2">
+                <label for="dataFinal" class="form-label">Data final</label>
+                <input id="dataFinal"
+                       name="dataFinal"
+                       type="date"
+                       value="@Model.DataFinal?.ToString("yyyy-MM-dd")"
+                       class="form-control"
+                       required />
+            </div>
+            <div class="col-lg-3 d-grid">
+                <button class="btn btn-success" type="submit">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Data e hora</th>
+                    <th>Administrador</th>
+                    <th>Ação</th>
+                    <th>Área</th>
+                    <th>Detalhes</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Registros.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            Nenhum registro encontrado.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model.Registros)
+                    {
+                        <tr>
+                            <td class="text-nowrap">@item.CriadoEm.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@item.UsuarioEmail</td>
+                            <td><span class="badge bg-dark">@item.Acao</span></td>
+                            <td>
+                                @item.Entidade
+                                @if (!string.IsNullOrWhiteSpace(item.EntidadeId))
+                                {
+                                    <div class="small text-muted">ID: @item.EntidadeId</div>
+                                }
+                            </td>
+                            <td style="min-width: 320px">@item.Descricao</td>
+                            <td class="text-nowrap">@(item.EnderecoIp ?? "—")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.TotalPaginas > 1)
+{
+    <nav class="mt-4" aria-label="Paginação da auditoria">
+        <ul class="pagination justify-content-center">
+            @for (var numero = 1; numero <= Model.TotalPaginas; numero++)
+            {
+                <li class="page-item @(numero == Model.PaginaAtual ? "active" : "")">
+                    <a class="page-link"
+                       asp-route-pagina="@numero"
+                       asp-route-busca="@Model.Busca"
+                       asp-route-entidade="@Model.Entidade"
+                       asp-route-dataInicial="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+                       asp-route-dataFinal="@Model.DataFinal?.ToString("yyyy-MM-dd")">@numero</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

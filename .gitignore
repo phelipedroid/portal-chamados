@@ -1,0 +1,45 @@
+# Compilacao e dependencias locais
+[Bb]in/
+[Oo]bj/
+artifacts/
+.packages/
+.dotnet_cli/
+.dotnet-cli/
+.vs/
+
+# Configuracoes reais de cada ambiente
+appsettings*.json
+!appsettings.example.json
+!appsettings.Production.example.json
+.env
+.env.*
+!.env.example
+
+# Bancos, backups, chaves e certificados
+*.db
+*.db-shm
+*.db-wal
+*.bak
+*.pfx
+*.p12
+*.pem
+*.key
+DataProtectionKeys/
+
+# Saidas temporarias e logs
+tmp/
+output/
+*.log
+
+# Materiais e rotinas internas que podem conter dados empresariais
+docs/
+GUIA_DO_PROJETO.md
+tools/build_portal_presentation_doc.py
+tools/PortalMaintenance/
+deploy/Reset-ProductionData.ps1
+deploy/Run-FinalProductionReset.ps1
+deploy/Test-GraphMail.ps1
+deploy/Switch-PortalToPort80.ps1
+deploy/README.md
+deploy/Finalize-ProjectMove.ps1
+deploy/Install-ProjectMoveFinalizer.ps1

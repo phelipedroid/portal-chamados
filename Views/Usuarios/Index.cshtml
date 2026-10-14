@@ -1,0 +1,186 @@
+@model IEnumerable<
+    PortalSanMarco.ViewModels.UsuarioListaViewModel>
+
+@{
+    ViewData["Title"] = "Usuários";
+
+    var ehAdministrador =
+        User.IsInRole("Administrador");
+
+    var totalColunas =
+        ehAdministrador ? 6 : 5;
+}
+
+<div class="d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap gap-3 mb-4">
+
+    <div>
+        <h1 class="h3 mb-1">
+            Usuários
+        </h1>
+
+        <p class="text-muted mb-0">
+            Funcionários e responsáveis pelo atendimento
+        </p>
+    </div>
+
+    @if (ehAdministrador)
+    {
+        <div class="d-flex gap-2">
+            <a asp-controller="Usuarios"
+               asp-action="Pendentes"
+               class="btn btn-outline-success">
+                Cadastros pendentes
+            </a>
+            <a asp-controller="Usuarios"
+               asp-action="Create"
+               class="btn btn-success">
+                Novo funcionário
+            </a>
+        </div>
+    }
+</div>
+
+@if (TempData["Sucesso"] is not null)
+{
+    <div class="alert alert-success">
+        @TempData["Sucesso"]
+    </div>
+}
+
+@if (!ehAdministrador)
+{
+    <div class="alert alert-info">
+        Você possui acesso somente para consulta.
+        Alterações de cadastro são exclusivas do
+        Administrador.
+    </div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table
+                      table-hover
+                      align-middle
+                      mb-0">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Funcionário</th>
+                    <th>Unidade</th>
+                    <th>Setor</th>
+                    <th>Perfil</th>
+                    <th>Situação</th>
+
+                    @if (ehAdministrador)
+                    {
+                        <th class="text-end">
+                            Ações
+                        </th>
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="@totalColunas"
+                            class="text-center
+                                   text-muted
+                                   py-5">
+                            Nenhum usuário cadastrado.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var usuario in Model)
+                    {
+                        <tr class="@(!usuario.Ativo
+                                    ? "table-secondary"
+                                    : "")">
+
+                            <td>
+                                <strong>
+                                    @usuario.NomeCompleto
+                                </strong>
+
+                                <div class="small text-muted">
+                                    @usuario.Email
+                                </div>
+                            </td>
+
+                            <td>
+                                @usuario.Unidade
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    usuario.UnidadesGerenciadas))
+                                {
+                                    <div class="small text-muted">
+                                        Gerencia: @usuario.UnidadesGerenciadas
+                                    </div>
+                                }
+                            </td>
+
+                            <td>
+                                @usuario.Setor
+                            </td>
+
+                            <td>
+                                <span class="badge bg-dark">
+                                    @usuario.Perfis
+                                </span>
+                            </td>
+
+                            <td>
+                                @if (usuario.Ativo)
+                                {
+                                    <span class="badge bg-success">
+                                        Ativo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Inativo
+                                    </span>
+                                }
+                            </td>
+
+                            @if (ehAdministrador)
+                            {
+                                <td class="text-end">
+    <div class="d-flex
+                justify-content-end
+                flex-wrap gap-2">
+
+        <a asp-controller="Usuarios"
+           asp-action="Edit"
+           asp-route-id="@usuario.UsuarioId"
+           class="btn
+                  btn-sm
+                  btn-outline-success">
+            Editar
+        </a>
+
+        <a asp-controller="Usuarios"
+           asp-action="ResetarSenha"
+           asp-route-id="@usuario.UsuarioId"
+           class="btn
+                  btn-sm
+                  btn-outline-warning">
+            Redefinir senha
+        </a>
+    </div>
+</td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

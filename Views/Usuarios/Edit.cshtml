@@ -1,0 +1,220 @@
+@model PortalSanMarco.ViewModels.EditarUsuarioViewModel
+
+@{
+    ViewData["Title"] = "Editar usuário";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10">
+        <div class="d-flex
+                    justify-content-between
+                    align-items-center
+                    flex-wrap gap-3 mb-4">
+
+            <div>
+                <h1 class="h3 mb-1">
+                    Editar usuário
+                </h1>
+
+                <p class="text-muted mb-0">
+                    Atualize o cadastro e as permissões
+                    de acesso
+                </p>
+            </div>
+
+            <a asp-controller="Usuarios"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Voltar
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form asp-controller="Usuarios"
+                      asp-action="Edit"
+                      method="post">
+
+                    <input asp-for="UsuarioId"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger">
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label asp-for="NomeCompleto"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="NomeCompleto"
+                                   class="form-control" />
+
+                            <span asp-validation-for="NomeCompleto"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label asp-for="Email"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Email"
+                                   class="form-control" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UnidadeId"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="UnidadeId"
+                                    asp-items="ViewBag.Unidades"
+                                    class="form-select">
+
+                                <option value="">
+                                    Selecione a unidade
+                                </option>
+                            </select>
+
+                            <span asp-validation-for="UnidadeId"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="SetorId"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="SetorId"
+                                    asp-items="ViewBag.Setores"
+                                    class="form-select">
+
+                                <option value="">
+                                    Selecione o setor
+                                </option>
+                            </select>
+
+                            <span asp-validation-for="SetorId"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div id="unidades-gerente"
+                             class="col-12 d-none">
+                            <label asp-for="UnidadesGerenciadasIds"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="UnidadesGerenciadasIds"
+                                    asp-items="ViewBag.Unidades"
+                                    class="form-select"
+                                    multiple
+                                    size="7">
+                            </select>
+
+                            <div class="form-text">
+                                Selecione todas as unidades cujos chamados
+                                este gerente poderá visualizar. Use Ctrl para
+                                marcar mais de uma opção.
+                            </div>
+
+                            <span asp-validation-for="UnidadesGerenciadasIds"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Cargo"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Cargo"
+                                   class="form-control" />
+
+                            <span asp-validation-for="Cargo"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Perfil"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="Perfil"
+                                    asp-items="ViewBag.Perfis"
+                                    class="form-select">
+                            </select>
+
+                            <span asp-validation-for="Perfil"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label d-block">
+                                Situação da conta
+                            </label>
+
+                            <div class="form-check
+                                        form-switch
+                                        border
+                                        rounded
+                                        px-5 py-2">
+
+                                <input asp-for="Ativo"
+                                       class="form-check-input" />
+
+                                <label asp-for="Ativo"
+                                       class="form-check-label">
+                                    Usuário ativo
+                                </label>
+                            </div>
+
+                            <span asp-validation-for="Ativo"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-4">
+                        <strong>Atenção:</strong>
+                        ao desativar a conta, o usuário não
+                        poderá entrar no portal. Seus chamados,
+                        comentários e históricos serão
+                        preservados.
+                    </div>
+
+                    <div class="d-flex
+                                justify-content-end
+                                gap-2 mt-4">
+
+                        <a asp-controller="Usuarios"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-success">
+                            Salvar alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

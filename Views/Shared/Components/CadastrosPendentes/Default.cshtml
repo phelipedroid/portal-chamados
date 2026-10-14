@@ -1,0 +1,15 @@
+@model int
+
+<li class="nav-item">
+    <a asp-controller="Usuarios"
+       asp-action="Pendentes"
+       class="nav-link @(ViewBag.Ativo ? "active fw-semibold" : "")">
+        Cadastros
+        @if (Model > 0)
+        {
+            <span class="badge rounded-pill bg-danger ms-1" aria-label="@Model cadastros pendentes">
+                @(Model > 99 ? "99+" : Model)
+            </span>
+        }
+    </a>
+</li>

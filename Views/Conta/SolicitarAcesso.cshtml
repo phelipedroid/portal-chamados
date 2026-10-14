@@ -1,0 +1,93 @@
+@model PortalSanMarco.ViewModels.AutocadastroViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Solicitar acesso";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitar acesso - Portal San Marco</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { min-height: 100vh; background: linear-gradient(135deg, #f4f7f5, #e8f3ed); }
+        .access-card { max-width: 760px; border: 0; border-radius: 18px; box-shadow: 0 22px 55px rgba(10,55,35,.12); }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center p-4">
+    <main class="card access-card w-100">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-success fw-bold mb-3">Portal San Marco</div>
+            <h1 class="h3 mb-2">Solicitar acesso</h1>
+            <p class="text-muted mb-4">
+                Preencha seus dados corporativos. A conta ficará aguardando a aprovação da equipe de TI.
+            </p>
+
+            <form asp-controller="Conta" asp-action="SolicitarAcesso" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label asp-for="NomeCompleto" class="form-label fw-semibold"></label>
+                        <input asp-for="NomeCompleto" class="form-control" autocomplete="name" autofocus />
+                        <span asp-validation-for="NomeCompleto" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" placeholder="nome@empresa.com.br" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="UnidadeId" class="form-label fw-semibold"></label>
+                        <select asp-for="UnidadeId" asp-items="ViewBag.Unidades" class="form-select">
+                            <option value="">Selecione</option>
+                        </select>
+                        <span asp-validation-for="UnidadeId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SetorId" class="form-label fw-semibold"></label>
+                        <select asp-for="SetorId" asp-items="ViewBag.Setores" class="form-select">
+                            <option value="">Selecione</option>
+                        </select>
+                        <span asp-validation-for="SetorId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Cargo" class="form-label fw-semibold"></label>
+                        <input asp-for="Cargo" class="form-control" autocomplete="organization-title" />
+                        <span asp-validation-for="Cargo" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Senha" class="form-label fw-semibold"></label>
+                        <input asp-for="Senha" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="Senha" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmarSenha" class="form-label fw-semibold"></label>
+                        <input asp-for="ConfirmarSenha" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmarSenha" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="form-text mt-3">
+                    A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula, número e caractere especial.
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg w-100 mt-4">
+                    Enviar solicitação
+                </button>
+            </form>
+
+            <a asp-controller="Conta" asp-action="Entrar" class="btn btn-link text-success w-100 mt-3">
+                Voltar para o login
+            </a>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

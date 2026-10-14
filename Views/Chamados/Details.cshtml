@@ -1,0 +1,694 @@
+@model PortalSanMarco.Models.Chamado
+
+@{
+    ViewData["Title"] = $"Chamado #{Model.Id:D6}";
+    var podeAtender = ViewBag.PodeAtender is true;
+    var podeInteragir = ViewBag.PodeInteragir is true;
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            Chamado #@Model.Id.ToString("D6")
+        </h1>
+        <p class="text-muted mb-0">@Model.Titulo</p>
+    </div>
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+        Voltar
+    </a>
+</div>
+
+@if (TempData["Sucesso"] is not null)
+{
+    <div class="alert alert-success">
+        @TempData["Sucesso"]
+    </div>
+}
+
+@if (TempData["Erro"] is not null)
+{
+    <div class="alert alert-danger">
+        @TempData["Erro"]
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                    <h2 class="h5 mb-0">Descrição do chamado</h2>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-secondary">
+                            @Model.Prioridade
+                        </span>
+                        <span class="badge bg-primary">
+                            @Model.Status
+                        </span>
+                    </div>
+                </div>
+
+                <p class="mb-0" style="white-space: pre-wrap">@Model.Descricao</p>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SolucaoAplicada))
+        {
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Solução aplicada</h2>
+                    <p class="mb-0" style="white-space: pre-wrap">@Model.SolucaoAplicada</p>
+                </div>
+            </div>
+        }
+
+        @if (podeAtender)
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-4">Painel de atendimento</h2>
+
+                    @if (Model.Status == StatusChamado.Fechado)
+                    {
+                        <div class="alert alert-secondary mb-0">
+                            Este chamado está fechado. O atendimento permanece
+                            disponível somente para consulta.
+                        </div>
+                    }
+                    else
+                    {
+                        @if (Model.TecnicoResponsavelId is null)
+                        {
+                            <form asp-action="Assumir"
+                                  asp-route-id="@Model.Id"
+                                  method="post"
+                                  class="mb-4">
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    Assumir chamado
+                                </button>
+                            </form>
+                        }
+
+                        <form asp-action="AtualizarAtendimento"
+                              method="post">
+                        <input type="hidden"
+                               name="ChamadoId"
+                               value="@Model.Id" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Prioridade"
+                                       class="form-label"></label>
+                                <select asp-for="Prioridade"
+                                        asp-items="Html.GetEnumSelectList<PrioridadeChamado>()"
+                                        class="form-select">
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+    <label asp-for="Status"
+           class="form-label"></label>
+
+    <select asp-for="Status"
+            class="form-select">
+
+        @foreach (var status in
+            Enum.GetValues<StatusChamado>())
+        {
+            if (status == StatusChamado.Resolvido &&
+                Model.Status != StatusChamado.Resolvido)
+            {
+                continue;
+            }
+
+            var statusTexto = status switch
+            {
+                StatusChamado.EmAndamento =>
+                    "Em andamento",
+
+                StatusChamado.AguardandoFuncionario =>
+                    "Aguardando funcionário",
+
+                StatusChamado.AguardandoFornecedor =>
+                    "Aguardando fornecedor",
+
+                StatusChamado.Resolvido =>
+                    "Resolvido (registro antigo)",
+
+                StatusChamado.Fechado =>
+                    "Fechado",
+
+                _ =>
+                    status.ToString()
+            };
+
+            if (status == Model.Status)
+            {
+                <option value="@((int)status)"
+                        selected>
+                    @statusTexto
+                </option>
+            }
+            else
+            {
+                <option value="@((int)status)">
+                    @statusTexto
+                </option>
+            }
+        }
+    </select>
+
+    <div class="form-text">
+        Ao concluir o atendimento, selecione Fechado.
+    </div>
+</div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    Tempo gasto em minutos
+                                </label>
+                                <input type="number"
+                                       name="TempoGastoMinutos"
+                                       min="1"
+                                       value="@Model.TempoGastoMinutos"
+                                       class="form-control" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    Solução aplicada
+                                </label>
+                                <textarea name="SolucaoAplicada"
+                                          rows="6"
+                                          class="form-control"
+                                          placeholder="Descreva o atendimento realizado">@Model.SolucaoAplicada</textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-success mt-4">
+                            Salvar atendimento
+                        </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5 mb-4">
+                    Informações
+                </h2>
+                <dl class="mb-0">
+                    <dt>Solicitante</dt>
+                    <dd>@Model.Solicitante.Email</dd>
+                    <dt>Categoria</dt>
+                    <dd>@Model.Categoria.Nome</dd>
+                    <dt>Unidade</dt>
+                    <dd>@Model.Unidade.Nome</dd>
+                    <dt>Setor</dt>
+                    <dd>@Model.Setor.Nome</dd>
+                    <dt>Computador ou patrimônio</dt>
+                    <dd>
+                        @(Model.ComputadorPatrimonio
+                            ?? "Não informado")
+                    </dd>
+                    <dt>Responsável</dt>
+                    <dd>
+                        @(Model.TecnicoResponsavel?.Email
+                            ?? "Não atribuído")
+                    </dd>
+                    <dt>Aberto em</dt>
+                    <dd>
+                        @Model.CriadoEm.ToString(
+                            "dd/MM/yyyy HH:mm")
+                    </dd>
+                    @if (Model.PrazoEm.HasValue)
+                    {
+                        <dt>Prazo de SLA</dt>
+                        <dd>
+                            @Model.PrazoEm.Value.ToString(
+                                "dd/MM/yyyy HH:mm")
+                            @if (Model.SlaPausadoEm.HasValue)
+                            {
+                                <span class="badge bg-info text-dark ms-1">
+                                    Pausado
+                                </span>
+                            }
+                            <div class="small text-muted">
+                                Horário útil, de segunda a sexta-feira,
+                                desconsiderando feriados configurados
+                            </div>
+                        </dd>
+                    }
+                    @if (Model.AssumidoEm.HasValue)
+                    {
+                        <dt>Assumido em</dt>
+                        <dd>
+                            @Model.AssumidoEm.Value.ToString(
+                                "dd/MM/yyyy HH:mm")
+                        </dd>
+                    }
+                    @if (Model.ResolvidoEm.HasValue)
+                    {
+                        <dt>Resolvido em</dt>
+                        <dd>
+                            @Model.ResolvidoEm.Value.ToString(
+                                "dd/MM/yyyy HH:mm")
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewBag.PodeTransferir == true &&
+    Model.Status !=
+        PortalSanMarco.Models.StatusChamado.Fechado)
+{
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body p-4">
+            <h2 class="h5 mb-2">
+                Transferir atendimento
+            </h2>
+
+            <p class="text-muted mb-4">
+                Altere o responsável por este chamado.
+                A transferência será registrada no histórico.
+            </p>
+
+            <form asp-controller="Chamados"
+                  asp-action="Transferir"
+                  method="post">
+
+                <input type="hidden"
+                       name="ChamadoId"
+                       value="@Model.Id" />
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label for="TecnicoId"
+                               class="form-label">
+                            Novo responsável
+                        </label>
+
+                        <select id="TecnicoId"
+                                name="TecnicoId"
+                                asp-items="ViewBag.TecnicosTransferencia"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                Selecione um responsável
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit"
+                                class="btn btn-outline-success w-100">
+                            Transferir chamado
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+@{
+    var historicos =
+        ViewBag.Historicos
+            as IEnumerable<
+                PortalSanMarco.Models.HistoricoChamado>
+        ?? Enumerable.Empty<
+            PortalSanMarco.Models.HistoricoChamado>();
+}
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body p-4">
+        <h2 class="h5 mb-4">
+            Histórico do chamado
+        </h2>
+
+        @if (!historicos.Any())
+        {
+            <div class="text-muted">
+                Nenhum evento registrado neste chamado.
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-4">
+                @foreach (var historico in historicos)
+                {
+                    <div class="d-flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="rounded-circle
+                                        bg-success
+                                        text-white
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center"
+                                 style="width: 38px;
+                                        height: 38px;">
+                                ✓
+                            </div>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex
+                                        justify-content-between
+                                        flex-wrap gap-2">
+                                <strong>
+                                    @historico.Acao
+                                </strong>
+
+                                <span class="small text-muted">
+                                    @historico.CriadoEm.ToString(
+                                        "dd/MM/yyyy HH:mm")
+                                </span>
+                            </div>
+
+                            <div class="text-muted mt-1">
+                                @historico.Descricao
+                            </div>
+
+                            <div class="small mt-1">
+                                Realizado por:
+                                <strong>
+                                    @historico.Usuario.Email
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@{
+    var comentarios =
+        ViewBag.Comentarios
+            as IEnumerable<
+                PortalSanMarco.Models.ComentarioChamado>
+        ?? Enumerable.Empty<
+            PortalSanMarco.Models.ComentarioChamado>();
+}
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body p-4">
+        <h2 class="h5 mb-4">
+            Conversa do chamado
+        </h2>
+
+        @if (!comentarios.Any())
+        {
+            <div class="text-muted mb-4">
+                Nenhuma mensagem adicionada.
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3 mb-4">
+                @foreach (var comentario in comentarios)
+                {
+                    var ehSolicitante =
+                        comentario.AutorId ==
+                        Model.SolicitanteId;
+
+                    <div class="d-flex
+                                @(ehSolicitante
+                                    ? "justify-content-start"
+                                    : "justify-content-end")">
+
+                        <div class="rounded-3 p-3
+                                    @(ehSolicitante
+                                        ? "bg-light border"
+                                        : "bg-success text-white")"
+                             style="max-width: 75%;">
+
+                            <div class="small fw-bold mb-1">
+                                @(ehSolicitante
+                                    ? "Solicitante"
+                                    : "Equipe de TI")
+                            </div>
+
+                            <div style="white-space: pre-wrap">@comentario.Mensagem</div>
+
+                            <div class="small mt-2
+                                        @(ehSolicitante
+                                            ? "text-muted"
+                                            : "text-white-50")">
+                                @comentario.Autor.Email ·
+                                @comentario.CriadoEm.ToString(
+                                    "dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (podeInteragir &&
+            Model.Status !=
+            PortalSanMarco.Models.StatusChamado.Fechado)
+        {
+            <form asp-controller="Comentarios"
+                  asp-action="Create"
+                  method="post">
+
+                <input type="hidden"
+                       name="ChamadoId"
+                       value="@Model.Id" />
+
+                <label class="form-label">
+                    Adicionar mensagem
+                </label>
+
+                <textarea name="Mensagem"
+                          class="form-control"
+                          rows="4"
+                          maxlength="2000"
+                          required
+                          placeholder="Escreva uma mensagem para continuar o atendimento"></textarea>
+
+                <div class="d-flex
+                            justify-content-between
+                            align-items-center mt-3">
+
+                    <span class="small text-muted">
+                        Máximo de 2.000 caracteres
+                    </span>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Enviar mensagem
+                    </button>
+                </div>
+            </form>
+        }
+        else if (!podeInteragir)
+        {
+            <div class="alert alert-info mb-0">
+                Visualização gerencial: as mensagens deste chamado
+                estão disponíveis somente para consulta.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-secondary mb-0">
+                Este chamado está fechado e não aceita
+                novas mensagens.
+            </div>
+        }
+    </div>
+</div>
+
+@{
+    var anexos =
+        ViewBag.Anexos
+            as IEnumerable<
+                PortalSanMarco.ViewModels.AnexoListaViewModel>
+        ?? Enumerable.Empty<
+            PortalSanMarco.ViewModels.AnexoListaViewModel>();
+}
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body p-4">
+        <h2 class="h5 mb-4">
+            Anexos
+        </h2>
+
+        @if (!anexos.Any())
+        {
+            <div class="text-muted mb-4">
+                Nenhum arquivo anexado.
+            </div>
+        }
+        else
+        {
+            <div class="row g-3 mb-4">
+                @foreach (var anexo in anexos)
+                {
+                    var tamanho =
+                        anexo.TamanhoBytes >= 1024 * 1024
+                            ? $"{anexo.TamanhoBytes /
+                                1024d / 1024d:N2} MB"
+                            : $"{anexo.TamanhoBytes /
+                                1024d:N0} KB";
+
+                    var ehImagem =
+                        anexo.TipoConteudo.StartsWith(
+                            "image/",
+                            StringComparison.OrdinalIgnoreCase);
+
+                    var urlVisualizacao =
+                        Url.Action(
+                            "Visualizar",
+                            "Anexos",
+                            new { id = anexo.Id });
+
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card h-100 overflow-hidden">
+                            @if (ehImagem)
+                            {
+                                <button type="button"
+                                        class="anexo-preview-botao border-0 p-0 bg-light"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal-imagem-anexo"
+                                        data-anexo-url="@urlVisualizacao"
+                                        data-anexo-nome="@anexo.NomeOriginal"
+                                        aria-label="Ampliar @anexo.NomeOriginal">
+
+                                    <img src="@urlVisualizacao"
+                                         class="anexo-miniatura"
+                                         loading="lazy"
+                                         alt="Miniatura de @anexo.NomeOriginal" />
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center bg-light text-danger"
+                                     style="height: 170px; font-size: 3rem;"
+                                     aria-hidden="true">
+                                    PDF
+                                </div>
+                            }
+
+                            <div class="card-body d-flex flex-column">
+                                <div class="fw-bold text-break">
+                                    @anexo.NomeOriginal
+                                </div>
+
+                                <div class="small text-muted mt-1">
+                                    @tamanho · @anexo.AutorEmail
+                                </div>
+
+                                <div class="small text-muted">
+                                    @anexo.CriadoEm.ToString(
+                                        "dd/MM/yyyy HH:mm")
+                                </div>
+
+                                <a asp-controller="Anexos"
+                                   asp-action="Download"
+                                   asp-route-id="@anexo.Id"
+                                   class="btn btn-sm btn-outline-success mt-3 align-self-start">
+                                    Baixar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (podeInteragir &&
+            Model.Status !=
+            PortalSanMarco.Models.StatusChamado.Fechado)
+        {
+            <form asp-controller="Anexos"
+                  asp-action="Enviar"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <input type="hidden"
+                       name="chamadoId"
+                       value="@Model.Id" />
+
+                <label class="form-label">
+                    Adicionar arquivo
+                </label>
+
+                <input type="file"
+                       name="arquivo"
+                       class="form-control"
+                       accept=".jpg,.jpeg,.png,.webp,.pdf"
+                       required />
+
+                <div class="d-flex
+                            justify-content-between
+                            align-items-center mt-3">
+
+                    <span class="small text-muted">
+                        JPG, PNG, WebP ou PDF — máximo 5 MB
+                    </span>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Enviar arquivo
+                    </button>
+                </div>
+            </form>
+        }
+        else if (!podeInteragir)
+        {
+            <div class="alert alert-info mb-0">
+                Visualização gerencial: os anexos deste chamado
+                estão disponíveis somente para consulta.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-secondary mb-0">
+                Este chamado está fechado e não aceita
+                novos anexos.
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade"
+     id="modal-imagem-anexo"
+     tabindex="-1"
+     aria-labelledby="titulo-modal-imagem-anexo"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5 text-break"
+                    id="titulo-modal-imagem-anexo">
+                    Visualizar imagem
+                </h2>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fechar">
+                </button>
+            </div>
+
+            <div class="modal-body bg-dark text-center p-2">
+                <img id="imagem-anexo-ampliada"
+                     class="anexo-imagem-ampliada"
+                     alt="Imagem anexada ampliada" />
+            </div>
+        </div>
+    </div>
+</div>

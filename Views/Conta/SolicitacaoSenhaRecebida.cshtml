@@ -1,0 +1,35 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Solicitação recebida";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitação recebida - Portal San Marco</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body class="min-vh-100 d-flex align-items-center justify-content-center p-4 bg-light">
+    <main class="card border-0 shadow-sm" style="max-width:540px">
+        <div class="card-body p-4 p-md-5 text-center">
+            <div class="display-5 text-success mb-3">✓</div>
+            <h1 class="h3 mb-3">Confira seu e-mail</h1>
+            <p class="text-muted">
+                Se o endereço estiver vinculado a uma conta ativa,
+                enviaremos um link de recuperação. Ele será válido por 30 minutos.
+            </p>
+            <p class="small text-muted">
+                Não recebeu? Confira o lixo eletrônico e aguarde alguns minutos
+                antes de tentar novamente.
+            </p>
+            <a asp-controller="Conta"
+               asp-action="Entrar"
+               class="btn btn-success mt-2">
+                Voltar para o login
+            </a>
+        </div>
+    </main>
+</body>
+</html>

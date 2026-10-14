@@ -1,0 +1,92 @@
+@{
+    ViewData["Title"] = "Acesso negado";
+
+    var usuarioAutenticado =
+        User.Identity?.IsAuthenticated == true;
+
+    var podeAcessarDashboard =
+        User.IsInRole("Tecnico") ||
+        User.IsInRole("Gerente") ||
+        User.IsInRole("Administrador");
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card border-0 shadow-sm mt-5">
+            <div class="card-body text-center p-4 p-md-5">
+                <div class="mx-auto
+                            d-flex
+                            align-items-center
+                            justify-content-center
+                            rounded-circle
+                            bg-danger
+                            bg-opacity-10
+                            mb-4"
+                     style="width: 84px; height: 84px;">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="42"
+                         height="42"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="#dc3545"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+
+                        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z" />
+
+                        <path d="M9 9l6 6" />
+
+                        <path d="M15 9l-6 6" />
+                    </svg>
+                </div>
+
+                <h1 class="h3 fw-bold mb-3">
+                    Acesso não autorizado
+                </h1>
+
+                <p class="text-muted mb-4">
+                    Você não possui permissão para acessar
+                    esta página. Caso precise dessa função,
+                    entre em contato com a equipe de TI.
+                </p>
+
+                @if (usuarioAutenticado)
+                {
+                    <div class="d-flex
+                                justify-content-center
+                                flex-wrap gap-2">
+
+                        <a asp-controller="Chamados"
+                           asp-action="Index"
+                           class="btn btn-success">
+                            Voltar para chamados
+                        </a>
+
+                        @if (podeAcessarDashboard)
+                        {
+                            <a asp-controller="Dashboard"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                Abrir Dashboard
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Conta"
+                       asp-action="Entrar"
+                       class="btn btn-success">
+                        Ir para o login
+                    </a>
+                }
+
+                <div class="small text-muted mt-4">
+                    Código de acesso: 403
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,126 @@
+@model PortalSanMarco.ViewModels.ResetarSenhaUsuarioViewModel
+
+@{
+    ViewData["Title"] = "Redefinir senha";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="d-flex
+                    justify-content-between
+                    align-items-center
+                    flex-wrap gap-3 mb-4">
+
+            <div>
+                <h1 class="h3 mb-1">
+                    Redefinir senha
+                </h1>
+
+                <p class="text-muted mb-0">
+                    Defina uma nova senha provisória
+                </p>
+            </div>
+
+            <a asp-controller="Usuarios"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Voltar
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <div class="text-muted small">
+                        Usuário
+                    </div>
+
+                    <div class="fw-bold">
+                        @Model.NomeCompleto
+                    </div>
+
+                    <div class="text-muted">
+                        @Model.Email
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    A senha atual não pode ser visualizada.
+                    Ao confirmar, ela será substituída pela
+                    nova senha provisória.
+                </div>
+
+                <form asp-controller="Usuarios"
+                      asp-action="ResetarSenha"
+                      method="post">
+
+                    <input asp-for="UsuarioId"
+                           type="hidden" />
+
+                    <input asp-for="NomeCompleto"
+                           type="hidden" />
+
+                    <input asp-for="Email"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger">
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NovaSenha"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="NovaSenha"
+                               class="form-control"
+                               autocomplete="new-password" />
+
+                        <span asp-validation-for="NovaSenha"
+                              class="text-danger small">
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ConfirmacaoSenha"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="ConfirmacaoSenha"
+                               class="form-control"
+                               autocomplete="new-password" />
+
+                        <span asp-validation-for="ConfirmacaoSenha"
+                              class="text-danger small">
+                        </span>
+                    </div>
+
+                    <partial name="_PasswordChecklist" />
+
+                    <div class="d-flex
+                                justify-content-end
+                                gap-2">
+
+                        <a asp-controller="Usuarios"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-warning">
+                            Redefinir senha
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/password-checklist.js"
+            asp-append-version="true"></script>
+}

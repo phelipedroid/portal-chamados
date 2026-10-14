@@ -1,0 +1,472 @@
+@model PortalSanMarco.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard da TI";
+
+    var minutosTrabalhados =
+        Model.TempoMedioTrabalhadoMinutos.HasValue
+            ? (int)Math.Round(
+                Model.TempoMedioTrabalhadoMinutos.Value)
+            : 0;
+
+    var horasTrabalhadas =
+        minutosTrabalhados / 60;
+
+    var minutosRestantes =
+        minutosTrabalhados % 60;
+
+    var tempoTrabalhadoTexto =
+        !Model.TempoMedioTrabalhadoMinutos.HasValue
+            ? "Sem dados"
+            : horasTrabalhadas > 0
+            ? $"{horasTrabalhadas}h {minutosRestantes}min"
+            : $"{minutosRestantes} min";
+
+    var minutosAteFinalizacao =
+        Model.TempoMedioAtendimentoMinutos.HasValue
+            ? (int)Math.Round(
+                Model.TempoMedioAtendimentoMinutos.Value)
+            : 0;
+
+    var horasAteFinalizacao =
+        minutosAteFinalizacao / 60;
+
+    var minutosRestantesAteFinalizacao =
+        minutosAteFinalizacao % 60;
+
+    var tempoAteFinalizacaoTexto =
+        !Model.TempoMedioAtendimentoMinutos.HasValue
+            ? "Sem dados"
+            : horasAteFinalizacao > 0
+            ? $"{horasAteFinalizacao}h {minutosRestantesAteFinalizacao}min"
+            : $"{minutosRestantesAteFinalizacao} min";
+
+    var maiorCategoria =
+        Model.ChamadosPorCategoria.Any()
+            ? Model.ChamadosPorCategoria.Max(
+                item => item.Quantidade)
+            : 1;
+
+    var maiorSetor =
+        Model.ChamadosPorSetor.Any()
+            ? Model.ChamadosPorSetor.Max(
+                item => item.Quantidade)
+            : 1;
+
+    var maiorTecnico =
+        Model.ChamadosPorTecnico.Any()
+            ? Model.ChamadosPorTecnico.Max(
+                item => item.Quantidade)
+            : 1;
+}
+
+<div class="d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap gap-3 mb-4">
+
+    <div>
+        <h1 class="h3 mb-1">
+            Dashboard da TI
+        </h1>
+
+        <p class="text-muted mb-0">
+            Indicadores dos atendimentos de suporte
+        </p>
+
+        <div class="small text-muted mt-1"
+             data-auto-refresh="60000">
+            Atualização automática a cada 1 minuto.
+            <span data-auto-refresh-status></span>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+    <a asp-controller="Dashboard"
+       asp-action="ExportarCsv"
+       asp-route-dataInicial="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+       asp-route-dataFinal="@Model.DataFinal?.ToString("yyyy-MM-dd")"
+       class="btn btn-success">
+        Exportar relatório
+    </a>
+
+    <a asp-controller="Chamados"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Ver chamados
+    </a>
+</div>
+</div>
+
+@if (TempData["Erro"] is not null)
+{
+    <div class="alert alert-danger">
+        @TempData["Erro"]
+    </div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get"
+              asp-controller="Dashboard"
+              asp-action="Index">
+
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="dataInicial"
+                           class="form-label">
+                        Data inicial
+                    </label>
+
+                    <input type="date"
+                           id="dataInicial"
+                           name="dataInicial"
+                           value="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label for="dataFinal"
+                           class="form-label">
+                        Data final
+                    </label>
+
+                    <input type="date"
+                           id="dataFinal"
+                           name="dataFinal"
+                           value="@Model.DataFinal?.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit"
+                                class="btn btn-success flex-grow-1">
+                            Atualizar período
+                        </button>
+
+                        <a asp-controller="Dashboard"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Mês atual
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="small text-muted mt-3">
+            O período considera a data de abertura do chamado,
+            incluindo todo o dia final selecionado.
+        </div>
+    </div>
+</div>
+
+<div id="resumo-principal-dashboard"
+     data-auto-refresh-region
+     class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Chamados abertos no período
+                </div>
+
+                <div class="fs-2 fw-bold text-primary">
+                    @Model.TotalChamados
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Abertos
+                </div>
+
+                <div class="fs-2 fw-bold text-primary">
+                    @Model.TotalAbertos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Em andamento
+                </div>
+
+                <div class="fs-2 fw-bold text-warning">
+                    @Model.TotalEmAndamento
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Finalizados
+                </div>
+
+                <div class="fs-2 fw-bold text-success">
+                    @Model.TotalFechados
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="resumo-secundario-dashboard"
+     data-auto-refresh-region
+     class="row g-3 mb-4">
+    <div class="col-xl col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Aguardando
+                </div>
+
+                <div class="fs-3 fw-bold text-secondary">
+                    @Model.TotalAguardando
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Urgentes ativos
+                </div>
+
+                <div class="fs-3 fw-bold text-danger">
+                    @Model.TotalUrgentes
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Sem responsável
+                </div>
+
+                <div class="fs-3 fw-bold text-dark">
+                    @Model.TotalSemResponsavel
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Tempo médio até finalização
+                </div>
+
+                <div class="fs-3 fw-bold text-success">
+                    @tempoAteFinalizacaoTexto
+                </div>
+
+                <div class="small text-muted">
+                    Tempo corrido entre abertura e finalização
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Tempo médio trabalhado
+                </div>
+
+                <div class="fs-3 fw-bold text-primary">
+                    @tempoTrabalhadoTexto
+                </div>
+
+                <div class="small text-muted">
+                    Tempo informado pelos técnicos
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="graficos-dashboard"
+     data-auto-refresh-region
+     class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-4">
+                    Categorias mais acionadas
+                </h2>
+
+                @if (!Model.ChamadosPorCategoria.Any())
+                {
+                    <div class="text-muted">
+                        Nenhum chamado no período.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (
+                            var item in
+                            Model.ChamadosPorCategoria)
+                        {
+                            var percentual =
+                                item.Quantidade * 100 /
+                                maiorCategoria;
+
+                            <div>
+                                <div class="d-flex
+                                            justify-content-between
+                                            gap-3 mb-1">
+
+                                    <span>
+                                        @item.Nome
+                                    </span>
+
+                                    <strong>
+                                        @item.Quantidade
+                                    </strong>
+                                </div>
+
+                                <div class="progress"
+                                     style="height: 7px;">
+
+                                    <div class="progress-bar
+                                                bg-success"
+                                         style="width: @percentual%">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-4">
+                    Setores com mais chamados
+                </h2>
+
+                @if (!Model.ChamadosPorSetor.Any())
+                {
+                    <div class="text-muted">
+                        Nenhum chamado no período.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (
+                            var item in
+                            Model.ChamadosPorSetor)
+                        {
+                            var percentual =
+                                item.Quantidade * 100 /
+                                maiorSetor;
+
+                            <div>
+                                <div class="d-flex
+                                            justify-content-between
+                                            gap-3 mb-1">
+
+                                    <span>
+                                        @item.Nome
+                                    </span>
+
+                                    <strong>
+                                        @item.Quantidade
+                                    </strong>
+                                </div>
+
+                                <div class="progress"
+                                     style="height: 7px;">
+
+                                    <div class="progress-bar
+                                                bg-primary"
+                                         style="width: @percentual%">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-4">
+                    Finalizados por técnico
+                </h2>
+
+                @if (!Model.ChamadosPorTecnico.Any())
+                {
+                    <div class="text-muted">
+                        Nenhum atendimento finalizado
+                        no período.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (
+                            var item in
+                            Model.ChamadosPorTecnico)
+                        {
+                            var percentual =
+                                item.Quantidade * 100 /
+                                maiorTecnico;
+
+                            <div>
+                                <div class="d-flex
+                                            justify-content-between
+                                            gap-3 mb-1">
+
+                                    <span class="text-truncate">
+                                        @item.Nome
+                                    </span>
+
+                                    <strong>
+                                        @item.Quantidade
+                                    </strong>
+                                </div>
+
+                                <div class="progress"
+                                     style="height: 7px;">
+
+                                    <div class="progress-bar
+                                                bg-dark"
+                                         style="width: @percentual%">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,134 @@
+@model PortalSanMarco.ViewModels.CadastrarFuncionarioViewModel
+
+@{
+    ViewData["Title"] = "Novo funcionário";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Novo funcionário</h1>
+    <p class="text-muted">
+        Cadastre o acesso individual ao Portal San Marco
+    </p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="NomeCompleto"
+                           class="form-label"></label>
+                    <input asp-for="NomeCompleto"
+                           class="form-control" />
+                    <span asp-validation-for="NomeCompleto"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Email"
+                           class="form-label"></label>
+                    <input asp-for="Email"
+                           class="form-control" />
+                    <span asp-validation-for="Email"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="SenhaProvisoria"
+                           class="form-label"></label>
+                    <input asp-for="SenhaProvisoria"
+                           class="form-control" />
+                    <span asp-validation-for="SenhaProvisoria"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="UnidadeId"
+                           class="form-label"></label>
+                    <select asp-for="UnidadeId"
+                            asp-items="ViewBag.Unidades"
+                            class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+                    <span asp-validation-for="UnidadeId"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="SetorId"
+                           class="form-label"></label>
+                    <select asp-for="SetorId"
+                            asp-items="ViewBag.Setores"
+                            class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+                    <span asp-validation-for="SetorId"
+                          class="text-danger"></span>
+                </div>
+
+                <div id="unidades-gerente"
+                     class="col-12 d-none">
+                    <label asp-for="UnidadesGerenciadasIds"
+                           class="form-label"></label>
+
+                    <select asp-for="UnidadesGerenciadasIds"
+                            asp-items="ViewBag.Unidades"
+                            class="form-select"
+                            multiple
+                            size="7">
+                    </select>
+
+                    <div class="form-text">
+                        Selecione todas as unidades cujos chamados
+                        este gerente poderá visualizar. Use Ctrl para
+                        marcar mais de uma opção.
+                    </div>
+
+                    <span asp-validation-for="UnidadesGerenciadasIds"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Cargo"
+                           class="form-label"></label>
+                    <input asp-for="Cargo"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Perfil"
+                           class="form-label"></label>
+                    <select asp-for="Perfil"
+                            asp-items="ViewBag.Perfis"
+                            class="form-select">
+                    </select>
+                    <span asp-validation-for="Perfil"
+                          class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-4 mb-0">
+                O funcionário deverá trocar a senha provisória
+                no primeiro acesso.
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-success">
+                    Cadastrar funcionário
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

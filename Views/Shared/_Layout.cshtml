@@ -1,0 +1,213 @@
+﻿@{
+    var controllerAtual =
+        ViewContext.RouteData.Values["controller"]
+            ?.ToString();
+
+    var areaAtual =
+        ViewContext.RouteData.Values["area"]
+            ?.ToString();
+
+    var acaoAtual =
+        ViewContext.RouteData.Values["action"]
+            ?.ToString();
+
+    var podeAcessarDashboard =
+        User.IsInRole("Tecnico") ||
+        User.IsInRole("Gerente") ||
+        User.IsInRole("Administrador");
+
+    var podeGerenciarUsuarios =
+        User.IsInRole("Administrador");
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - Portal San Marco
+    </title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/PortalSanMarco.styles.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+    <header>
+        <nav class="navbar
+                    navbar-expand-lg
+                    navbar-light
+                    bg-white
+                    border-bottom
+                    shadow-sm
+                    mb-4
+                    portal-navbar">
+
+            <div class="container">
+                <a class="navbar-brand fw-bold text-success"
+                   asp-controller="Chamados"
+                   asp-action="Index">
+                    Portal San Marco
+                </a>
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#menuPrincipal"
+                        aria-controls="menuPrincipal"
+                        aria-expanded="false"
+                        aria-label="Abrir menu">
+
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div id="menuPrincipal"
+                     class="navbar-collapse collapse">
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 portal-main-nav">
+                            @if (podeAcessarDashboard)
+                            {
+                                <li class="nav-item">
+                                    <a asp-controller="Dashboard"
+                                       asp-action="Index"
+                                       class="nav-link
+                                            @(controllerAtual == "Dashboard"
+                                                ? "active fw-semibold"
+                                                : "")">
+                                        Dashboard
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="nav-item">
+                                <a asp-controller="Chamados"
+                                   asp-action="Index"
+                                   class="nav-link
+                                        @(controllerAtual == "Chamados" &&
+                                          acaoAtual != "Create"
+                                            ? "active fw-semibold"
+                                            : "")">
+                                    Chamados
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a asp-controller="Chamados"
+                                   asp-action="Create"
+                                   class="nav-link
+                                        @(controllerAtual == "Chamados" &&
+                                          acaoAtual == "Create"
+                                            ? "active fw-semibold"
+                                            : "")">
+                                    Novo chamado
+                                </a>
+                            </li>
+
+                            @if (podeGerenciarUsuarios)
+                            {
+                                @await Component.InvokeAsync(
+                                    "CadastrosPendentes",
+                                    new
+                                    {
+                                        ativo = controllerAtual == "Usuarios" &&
+                                                (acaoAtual == "Pendentes" ||
+                                                 acaoAtual == "RevisarCadastro")
+                                    })
+
+                                <li class="nav-item">
+                                    <a asp-controller="Usuarios"
+                                       asp-action="Index"
+                                       class="nav-link
+                                            @(controllerAtual == "Usuarios" &&
+                                              acaoAtual != "Pendentes" &&
+                                              acaoAtual != "RevisarCadastro"
+                                                ? "active fw-semibold"
+                                                : "")">
+                                        Usuários
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <li class="nav-item">
+                                    <a asp-controller="Setores"
+                                       asp-action="Index"
+                                       class="nav-link
+                                            @(controllerAtual == "Setores"
+                                                ? "active fw-semibold"
+                                                : "")">
+                                        Setores
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Auditoria"
+                                       asp-action="Index"
+                                       class="nav-link
+                                            @(controllerAtual == "Auditoria"
+                                                ? "active fw-semibold"
+                                                : "")">
+                                        Auditoria
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="me-auto"></div>
+                    }
+
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main"
+              class="pb-5">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top
+                   footer
+                   text-muted
+                   bg-white">
+
+        <div class="container">
+            &copy; 2026 - Portal de Chamados San Marco
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js">
+    </script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
+</body>
+</html>

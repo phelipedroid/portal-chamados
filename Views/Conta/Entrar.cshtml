@@ -1,0 +1,323 @@
+@model PortalSanMarco.ViewModels.LoginViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Entrar";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0" />
+
+    <title>
+        Entrar - Portal San Marco
+    </title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4f7f5 0%,
+                    #e8f3ed 100%);
+        }
+
+        .login-page {
+            min-height: 100vh;
+        }
+
+        .brand-panel {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(
+                    145deg,
+                    #075c38,
+                    #15935d);
+            color: white;
+        }
+
+        .brand-panel::before {
+            content: "";
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            top: -150px;
+            right: -130px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            bottom: -140px;
+            left: -100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 1;
+            max-width: 520px;
+        }
+
+        .brand-mark {
+            width: min(320px, 75vw);
+        }
+
+        .brand-logo {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 64px;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .login-area {
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 470px;
+        }
+
+        .login-card {
+            border: 0;
+            border-radius: 20px;
+            box-shadow: 0 22px 55px rgba(10, 55, 35, 0.12);
+        }
+
+        .form-control {
+            min-height: 50px;
+            border-radius: 10px;
+        }
+
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15);
+        }
+
+        .btn-login {
+            min-height: 50px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 991.98px) {
+            .brand-panel {
+                min-height: 260px;
+            }
+
+            .login-area {
+                min-height: calc(100vh - 260px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0 login-page">
+            <section class="col-lg-6
+                            brand-panel
+                            d-flex
+                            align-items-center
+                            justify-content-center
+                            p-5">
+
+                <div class="brand-content">
+                    <div class="brand-mark mb-4">
+                        <img src="~/images/logo-san-marco-mob.png"
+                             asp-append-version="true"
+                             class="brand-logo"
+                             alt="San Marco mob" />
+                    </div>
+
+                    <h1 class="display-5 fw-bold mb-3">
+                        Portal de Chamados
+                    </h1>
+
+                    <p class="lead opacity-75 mb-0">
+                        Abra, acompanhe e consulte suas solicitações
+                        de suporte em um só lugar.
+                    </p>
+                </div>
+            </section>
+
+            <main class="col-lg-6
+                         login-area
+                         d-flex
+                         align-items-center
+                         justify-content-center
+                         p-4 p-md-5">
+
+                <div class="login-container">
+                    <div class="card login-card">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="mb-4">
+                                <h2 class="h3 fw-bold mb-2">
+                                    Bem-vindo
+                                </h2>
+
+                                <p class="text-muted mb-0">
+                                    Entre com sua conta corporativa
+                                    para acessar o portal.
+                                </p>
+                            </div>
+
+                            <form asp-controller="Conta"
+                                  asp-action="Entrar"
+                                  asp-route-returnUrl="@ViewBag.ReturnUrl"
+                                  method="post">
+
+                                @if (TempData["Sucesso"] is not null)
+                                {
+                                    <div class="alert alert-success">
+                                        @TempData["Sucesso"]
+                                    </div>
+                                }
+
+                                <div asp-validation-summary="ModelOnly"
+                                     class="alert alert-danger">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Email"
+                                           class="form-label fw-semibold">
+                                    </label>
+
+                                    <input asp-for="Email"
+                                           class="form-control"
+                                           autocomplete="username"
+                                           autofocus
+                                           placeholder="nome@empresa.com.br" />
+
+                                    <span asp-validation-for="Email"
+                                          class="text-danger small">
+                                    </span>
+                                </div>
+
+                                <div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <label asp-for="Senha"
+               class="form-label fw-semibold">
+        </label>
+
+        <a asp-controller="Conta"
+           asp-action="EsqueciSenha"
+           class="small text-success text-decoration-none">
+            Esqueci minha senha
+        </a>
+    </div>
+
+    <div class="input-group">
+        <input asp-for="Senha"
+               class="form-control"
+               autocomplete="current-password"
+               placeholder="Digite sua senha" />
+
+        <button type="button"
+                id="alternarSenha"
+                class="btn btn-outline-secondary"
+                aria-label="Mostrar senha"
+                title="Mostrar senha">
+
+            <svg id="iconeOlho"
+                 xmlns="http://www.w3.org/2000/svg"
+                 width="20"
+                 height="20"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12" />
+                <circle cx="12"
+                        cy="12"
+                        r="3" />
+            </svg>
+        </button>
+    </div>
+
+    <span asp-validation-for="Senha"
+          class="text-danger small">
+    </span>
+</div>
+
+                                <div class="form-check mb-4">
+                                    <input asp-for="ManterConectado"
+                                           class="form-check-input" />
+
+                                    <label asp-for="ManterConectado"
+                                           class="form-check-label">
+                                    </label>
+                                </div>
+
+                                <button type="submit"
+                                        class="btn
+                                               btn-success
+                                               btn-login
+                                               w-100">
+                                    Entrar no portal
+                                </button>
+                            </form>
+
+                            <div class="text-center mt-3">
+                                <span class="small text-muted">Ainda não possui acesso?</span>
+                                <a asp-controller="Conta"
+                                   asp-action="SolicitarAcesso"
+                                   class="small fw-semibold text-success text-decoration-none">
+                                    Solicitar cadastro
+                                </a>
+                            </div>
+
+                            <div class="border-top mt-4 pt-4">
+                                <p class="small text-muted mb-0">
+                                    Problemas para acessar? Entre em contato
+                                    com a equipe de TI pelo ramal 1016.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center
+                                small
+                                text-muted
+                                mt-4">
+                        &copy; @DateTime.Now.Year Grupo San Marco
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js">
+    </script>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js">
+    </script>
+
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js">
+    </script>
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+</body>
+</html>
